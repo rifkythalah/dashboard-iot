@@ -42,7 +42,7 @@
                             <span class="badge bg-success">Normal</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <img src="img/image 1.png" alt="" width="30"> RFID System
+                        <i class="fa-solid fa-broadcast-tower fs-6 text-primary"></i> RFID System
                             <span class="badge bg-success">Active</span>
                         </li>
                     </ul>
@@ -183,18 +183,18 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-4">
-                        <div class="card border-0 shadow-sm p-3 h-100">
+                        <div class=" p-3 h-100">
                             <h5 class="card-title mb-3">Parking Map</h5>
                             <div class="parking-map d-flex justify-content-center align-items-center">
                                 <div class="parking-slot-container">
-                                    <span class="parking-label">P1</span>
+                                    <span class="parking-label">Parking Area A</span>
                                     <div class="parking-slot occupied">
                                         <img src="img/mobil.png" alt="Car" class="car-icon">
                                     </div>
                                 </div>
                                 <div class="separator"></div>
                                 <div class="parking-slot-container">
-                                    <span class="parking-label">P2</span>
+                                    <span class="parking-label">Parking Area B</span>
                                     <div class="parking-slot available">
                                     </div>
                                 </div>
@@ -202,15 +202,15 @@
                         </div>
                     </div>
                     <div class="col-md-6 mb-4">
-                        <div class="card border-0 shadow-sm p-3 h-100">
+                        <div class=" p-3 h-100">
                             <h5 class="card-title mb-3">Recent Activity</h5>
                             <ul class="list-unstyled recent-activity-list">
-                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 10:30 - RFID Card #1234 masuk</li>
-                                <li class="mb-2"><span class="text-primary me-2">&bull;</span> 10:25 - Slot A-15 tersedia</li>
-                                <li class="mb-2"><span class="text-danger me-2">&bull;</span> 10:10 - Alarm Kebakaran aktif (Area C)</li>
-                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 09:55 - Kendaraan keluar (Slot B-07)</li>
-                                <li class="mb-2"><span class="text-primary me-2">&bull;</span> 09:40 - Slot A-03 terisi</li>
-                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 09:20 - Kendaraan masuk (Slot C-22)</li>
+                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 10:30 - RFID Card #123 masuk</li>
+                                <li class="mb-2"><span class="text-primary me-2">&bull;</span> 10:25 - Parking Area A tersedia</li>
+                                <li class="mb-2"><span class="text-danger me-2">&bull;</span> 10:10 - Alarm Kebakaran aktif</li>
+                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 09:55 - Kendaraan keluar (Parking Area B)</li>
+                                <li class="mb-2"><span class="text-primary me-2">&bull;</span> 09:40 - Parking Area B terisi</li>
+                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 09:20 - Kendaraan masuk (Parking Area A)</li>
                             </ul>
                         </div>
                     </div>
@@ -274,24 +274,22 @@
         margin: 0 15px;
     }
     .dashboard-overview-card {
-        margin-top: 20px; /* Default margin for larger screens */
+        margin-top: 20px;
     }
 
     @media (max-width: 767px) {
         .text-section {
-            text-align: center; /* Center text on mobile */
+            text-align: center; 
             margin-bottom: 20px;
         }
         .dashboard-overview-card {
-            margin-top: 40px; /* Adjust margin for mobile */
+            margin-top: 40px; 
         }
     }
 
-    /* Media query for tablet devices (e.g., 768px to 991px) */
     @media (min-width: 768px) and (max-width: 991px) {
         .dashboard-overview-card {
-            margin-top: 30px; /* Adjust margin for tablets */
-        }
+            margin-top: 30px; 
     }
 </style>
 @endpush

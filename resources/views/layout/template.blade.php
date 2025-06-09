@@ -162,7 +162,7 @@
     <nav class="navbar navbar-expand-lg bg-light fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-            <i class="fa-solid fa-car-side me-2"></i>
+            <img src="{{ asset('img/image 2.png') }}" alt="Logo" class="img-fluid" style="width: 30px; height: 30px;">
                 Smart Parking System IoT
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
