@@ -1,15 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 
-Route::get('/', function () {
-    return view('beranda');
-});
-
-Route::get('/beranda', function () {
-    return view('beranda');
-});
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-});
+Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+Route::get('/beranda', [DashboardController::class, 'beranda']);
+Route::get('/', [DashboardController::class, 'beranda']);

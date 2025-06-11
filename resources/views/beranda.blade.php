@@ -37,14 +37,25 @@
                         </div>
                     </div>
                     <ul class="list-group list-group-flush text-start">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <i class="bi bi-fire me-2 text-danger"></i> Fire Detection
+    @if(isset($latestFlame))
+        <span class="badge 
+            {{ $latestFlame->status == 'Danger' ? 'bg-danger' : ($latestFlame->status == 'Warning' ? 'bg-warning' : 'bg-success') }}">
+            {{ $latestFlame->status }}
+        </span>
+    @else
+        <span class="badge bg-success">SAFE</span>
+    @endif
+</li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <i class="bi bi-fire me-2 text-danger"></i> Fire Detection
-                            <span class="badge bg-success">Normal</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <i class="fa-solid fa-broadcast-tower fs-6 text-primary"></i> RFID System
-                            <span class="badge bg-success">Active</span>
-                        </li>
+    <i class="fa-solid fa-broadcast-tower fs-6 text-primary"></i> RFID System
+    @if($rfidSystemStatus == 'Active')
+        <span class="badge bg-success">Active</span>
+    @else
+        <span class="badge bg-danger">Off</span>
+    @endif
+</li>
                     </ul>
                 </div>
             </div>
@@ -160,23 +171,27 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card border-0 shadow-sm text-center p-3 h-100">
-                            <div class="card-body">
-                            <i class="fa-solid fa-broadcast-tower fs-4 text-primary"></i>
-                                <h6 class="card-subtitle mb-2 text-muted">RFID Active</h6>
-                                <p class="display-5 fw-bold text-primary">2</p>
-                                <small class="text-muted">Kartu terdaftar hari ini</small>
-                            </div>
+                    <div class="card border-0 shadow-sm text-center p-3 h-100">
+                    <div class="card-body">
+    <i class="fa-solid fa-broadcast-tower fs-4 text-primary"></i>
+    <h6 class="card-subtitle mb-2 text-muted">RFID Active</h6>
+    <p class="display-5 fw-bold text-primary">{{ $activeCount }}</p>
+    <small class="text-muted">Kartu terdaftar hari ini</small>
+</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card border-0 shadow-sm text-center p-3 h-100">
-                            <div class="card-body">
-                            <i class="bi bi-fire me-2 text-danger mb-2 fs-4"></i>
-                                <h6 class="card-subtitle mb-2 text-muted">Fire Status</h6>
-                                <p class="display-5 fw-bold text-success">SAFE</p>
-                                <small class="text-muted">Semua sensor normal</small>
-                            </div>
+                        <div class="card-body">
+    <i class="bi bi-fire me-2 text-danger mb-2 fs-4"></i>
+    <h6 class="card-subtitle mb-2 text-muted">Fire Status</h6>
+    <p class="display-5 fw-bold text-{{ $latestFlame && $latestFlame->status == 'Danger' ? 'danger' : ($latestFlame && $latestFlame->status == 'Warning' ? 'warning' : 'success') }}">
+        {{ $latestFlame ? strtoupper($latestFlame->status) : 'SAFE' }}
+    </p>
+    <small class="text-muted">
+        {{ $latestFlame && $latestFlame->status == 'Danger' ? 'Alarm kebakaran aktif!' : 'Semua sensor normal' }}
+    </small>
+</div>
                         </div>
                     </div>
                 </div>
@@ -202,17 +217,28 @@
                         </div>
                     </div>
                     <div class="col-md-6 mb-4">
-                        <div class=" p-3 h-100">
-                            <h5 class="card-title mb-3">Recent Activity</h5>
-                            <ul class="list-unstyled recent-activity-list">
-                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 10:30 - RFID Card #123 masuk</li>
-                                <li class="mb-2"><span class="text-primary me-2">&bull;</span> 10:25 - Parking Area A tersedia</li>
-                                <li class="mb-2"><span class="text-danger me-2">&bull;</span> 10:10 - Alarm Kebakaran aktif</li>
-                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 09:55 - Kendaraan keluar (Parking Area B)</li>
-                                <li class="mb-2"><span class="text-primary me-2">&bull;</span> 09:40 - Parking Area B terisi</li>
-                                <li class="mb-2"><span class="text-success me-2">&bull;</span> 09:20 - Kendaraan masuk (Parking Area A)</li>
-                            </ul>
-                        </div>
+                    <div class=" p-3 h-100">
+                     <h5 class="card-title mb-3">Recent Activity</h5>
+                     <ul class="list-unstyled recent-activity-list">
+    {{-- RFID Activity --}}
+    @foreach($recentRfidLogs as $log)
+        <li class="mb-2">
+            <span class="text-{{ $log->activity == 'masuk' ? 'success' : 'danger' }} me-2">&bull;</span>
+            {{ \Carbon\Carbon::parse($log->activity_time)->format('H:i') }} - RFID Card #{{ $log->id_rfid }} {{ $log->activity }}
+        </li>
+    @endforeach
+
+    {{-- Flame Activity (hanya Danger) --}}
+    @foreach($flameHistory as $log)
+        @if($log->status == 'Danger')
+        <li class="mb-2">
+            <span class="text-danger me-2">&bull;</span>
+            {{ \Carbon\Carbon::parse($log->last_update)->format('H:i') }} - Alarm Kebakaran aktif
+        </li>
+        @endif
+    @endforeach
+</ul>
+            </div>
                     </div>
                 </div>
             </div>
@@ -292,4 +318,46 @@
             margin-top: 30px; 
     }
 </style>
+
+  <script>
+  function updateFireStatus() {
+      fetch('/api/flame/latest')
+          .then(response => response.json())
+          .then(data => {
+              if(data.success && data.data) {
+                  let flame = data.data;
+                  let badge = document.querySelector('.status-badge');
+                  let warningLight = document.querySelector('.warning-light');
+                  let gaugeValue = document.getElementById('gaugeValue');
+                  let indicator = flame.indicator;
+
+                  // Update badge & warning light
+                  if(flame.status === 'Danger') {
+                      badge.className = 'badge bg-danger status-badge';
+                      badge.textContent = 'DANGER';
+                      warningLight.className = 'warning-light danger';
+                  } else if(flame.status === 'Warning') {
+                      badge.className = 'badge bg-warning status-badge';
+                      badge.textContent = 'WARNING';
+                      warningLight.className = 'warning-light';
+                  } else {
+                      badge.className = 'badge bg-success status-badge';
+                      badge.textContent = 'SAFE';
+                      warningLight.className = 'warning-light safe';
+                  }
+
+                  // Update gauge
+                  if(window.gaugeChart) {
+                      gaugeChart.data.datasets[0].data = [indicator, 100-indicator];
+                      gaugeChart.data.datasets[0].backgroundColor = [indicator >= 70 ? '#dc3545' : '#28a745', '#343a40'];
+                      gaugeChart.update();
+                  }
+                  if(gaugeValue) gaugeValue.textContent = indicator;
+              }
+          });
+  }
+  setInterval(updateFireStatus, 5000);
+  document.addEventListener('DOMContentLoaded', updateFireStatus);
+  </script>
+
 @endpush

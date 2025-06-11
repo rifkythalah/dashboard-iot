@@ -2,6 +2,7 @@
 
 @section('content')
 
+
 <section class="py-5">
     <div class="container">
         <div class="text-right mb-5">
@@ -88,9 +89,12 @@
                             <div class="card-body text-center">
                                 <h6 class="mb-3">Current Status</h6>
                                 <div class="status-indicator mb-3">
-                                    <span class="badge bg-success status-badge">SAFE</span>
-                                </div>
-                                <div class="warning-light safe"></div>
+    <span class="badge 
+        {{ $latestFlame && $latestFlame->status == 'Danger' ? 'bg-danger' : ($latestFlame && $latestFlame->status == 'Warning' ? 'bg-warning' : 'bg-success') }} status-badge">
+        {{ $latestFlame ? strtoupper($latestFlame->status) : 'SAFE' }}
+    </span>
+</div>
+<div class="warning-light {{ $latestFlame && $latestFlame->status == 'Danger' ? 'danger' : 'safe' }}"></div>
                             </div>
                         </div>
                     </div>
@@ -116,7 +120,6 @@
                             <tr>
                                 <th>No</th>
                                 <th>Sensor ID</th>
-                                <th>Location</th>
                                 <th>Indicator</th>
                                 <th>Level</th>
                                 <th>Status</th>
@@ -124,34 +127,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>FS-001</td>
-                                <td>Parking Area A</td>
-                                <td>25</td>
-                                <td>Low</td>
-                                <td><span class="badge bg-success">Safe</span></td>
-                                <td>03:51 PM</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>FS-002</td>
-                                <td>Parking Area B</td>
-                                <td>60</td>
-                                <td>Medium</td>
-                                <td><span class="badge bg-warning">Warning</span></td>
-                                <td>03:51 PM</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>FS-003</td>
-                                <td>Parking Area C</td>
-                                <td>90</td>
-                                <td>High</td>
-                                <td><span class="badge bg-danger">Danger</span></td>
-                                <td>03:51 PM</td>
-                            </tr>
-                        </tbody>
+@foreach($flameHistory as $i => $row)
+<tr>
+    <td>{{ $i+1 }}</td>
+    <td>{{ $row->sensor_id }}</td>
+    <td>{{ $row->indicator }}</td>
+    <td>{{ $row->level }}</td>
+    <td>
+        <span class="badge 
+            {{ $row->status == 'Safe' ? 'bg-success' : ($row->status == 'Warning' ? 'bg-warning' : 'bg-danger') }}">
+            {{ $row->status }}
+        </span>
+    </td>
+    <td>{{ \Carbon\Carbon::parse($row->last_update)->format('H:i') }}</td>
+</tr>
+@endforeach
+</tbody>
                     </table>
                 </div>
             </div>
@@ -240,7 +231,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Gauge value (replace with real sensor value)
-    let gaugeValue = 25; // default value
+   // Ganti let gaugeValue = 25; dengan:
+let gaugeValue = {{ $latestFlame ? $latestFlame->indicator : 0 }};
 
     // Gauge config
     const ctx = document.getElementById('fireGauge').getContext('2d');
@@ -321,5 +313,46 @@ function updateWaktuWIB() {
 setInterval(updateWaktuWIB, 1000);
 document.addEventListener('DOMContentLoaded', updateWaktuWIB);
 </script>
+
+  <script>
+  function updateFireStatus() {
+      fetch('/api/flame/latest')
+          .then(response => response.json())
+          .then(data => {
+              if(data.success && data.data) {
+                  let flame = data.data;
+                  let badge = document.querySelector('.status-badge');
+                  let warningLight = document.querySelector('.warning-light');
+                  let gaugeValue = document.getElementById('gaugeValue');
+                  let indicator = flame.indicator;
+
+                  // Update badge & warning light
+                  if(flame.status === 'Danger') {
+                      badge.className = 'badge bg-danger status-badge';
+                      badge.textContent = 'DANGER';
+                      warningLight.className = 'warning-light danger';
+                  } else if(flame.status === 'Warning') {
+                      badge.className = 'badge bg-warning status-badge';
+                      badge.textContent = 'WARNING';
+                      warningLight.className = 'warning-light';
+                  } else {
+                      badge.className = 'badge bg-success status-badge';
+                      badge.textContent = 'SAFE';
+                      warningLight.className = 'warning-light safe';
+                  }
+
+                  // Update gauge
+                  if(window.gaugeChart) {
+                      gaugeChart.data.datasets[0].data = [indicator, 100-indicator];
+                      gaugeChart.data.datasets[0].backgroundColor = [indicator >= 70 ? '#dc3545' : '#28a745', '#343a40'];
+                      gaugeChart.update();
+                  }
+                  if(gaugeValue) gaugeValue.textContent = indicator;
+              }
+          });
+  }
+  setInterval(updateFireStatus, 5000);
+  document.addEventListener('DOMContentLoaded', updateFireStatus);
+  </script>
 
 @endpush

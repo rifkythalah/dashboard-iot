@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="10">
     <title>Smart Parking Dashboard</title>
     <link rel="icon" href="img/image 2.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +20,7 @@
             --text-light: #ecf0f1;
             --text-muted: #bdc3c7;
         }
-        
+
         body {
             background-color: #ffffff; /* Light background for the main content area */
             color: #333; /* Darker text for readability */
@@ -57,14 +58,14 @@
         .nav-link:hover {
             color: var(--accent-blue) !important;
         }
-        
+
         .dashboard-container {
             flex: 1; /* Allows container to grow and push footer down */
             padding: 2rem;
             max-width: 1200px; /* Max width for content */
             margin: 0 auto; /* Center the content */
         }
-        
+
         .card {
             border: none;
             border-radius: 12px;
@@ -72,18 +73,18 @@
             transition: all 0.3s ease;
             margin-bottom: 1.5rem;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-        
+
         .stat-card {
             color: white;
             position: relative;
             overflow: hidden;
         }
-        
+
         .stat-card .icon {
             font-size: 2.5rem;
             opacity: 0.3;
@@ -91,49 +92,49 @@
             right: 20px;
             top: 20px;
         }
-        
+
         .chart-container {
             position: relative;
             height: 300px;
         }
-        
+
         .header-title {
             font-size: 2.2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
-        
+
         .header-subtitle {
             color: var(--text-muted);
             font-size: 1rem;
         }
-        
+
         .badge-duration {
             padding: 0.35em 0.65em;
             font-weight: 500;
             border-radius: 8px;
         }
-        
+
         .table-responsive {
             border-radius: 12px;
             overflow: hidden;
         }
-        
+
         .table thead {
             background-color: rgba(0,0,0,0.2);
         }
-        
+
         .table th {
             border: none;
             font-weight: 500;
             padding: 1rem;
         }
-        
+
         .table td {
             vertical-align: middle;
             padding: 0.75rem 1rem;
         }
-        
+
         .parking-slot {
             font-weight: 600;
         }
@@ -169,14 +170,14 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/beranda">Beranda</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
-                    </li>
-                </ul>
+            <ul class="navbar-nav">
+    <li class="nav-item">
+        <a class="nav-link {{ request()->is('beranda') ? 'active' : '' }}" href="/beranda">Beranda</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="/dashboard">Dashboard</a>
+    </li>
+</ul>
             </div>
         </div>
     </nav>
@@ -187,7 +188,7 @@
 
     <footer class="footer">
         <div class="container">
-            <p class="mb-0">&copy; 2024 SmartPark IoT. All rights reserved.</p>
+            <p class="mb-0"> Smart Parking System IoT. All rights reserved &copy; 2025.</p>
         </div>
     </footer>
 
