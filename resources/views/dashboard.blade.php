@@ -23,39 +23,47 @@
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Slot Parkir</th>
-                                <th>Jam Masuk</th>
-                                <th>Jam Keluar</th>
-                                <th>Durasi</th>
-                                <th>Status</th>
-                                <th>Total Biaya</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><span class="parking-slot">Parking Area A</span></td>
-                                <td>07:30</td>
-                                <td>09:10</td>
-                                <td><span class="badge bg-success badge-duration">1 jam 40 menit</span></td>
-                                <td><span class="badge bg-success">Selesai</span></td>
-                                <td>Rp. 10.000</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><span class="parking-slot">Parking Area B</span></td>
-                                <td>09:20</td>
-                                <td>-</td>
-                                <td><span class="badge bg-secondary badge-duration">0 jam 45 menit</span></td>
-                                <td><span class="badge bg-info">Aktif</span></td>
-                                <td>Rp. 0</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <table class="table table-dark table-hover mb-0">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Slot Parkir</th>
+            <th>Jam Masuk</th>
+            <th>Jam Keluar</th>
+            <th>Durasi</th>
+            <th>Status</th>
+            <th>Total Biaya</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($recentParkings as $i => $row)
+        <tr>
+            <td>{{ $i+1 }}</td>
+            <td>Parking Area {{ $row->slot }}</td>
+            <td>{{ \Carbon\Carbon::parse($row->entry_time)->format('H:i') }}</td>
+            <td>{{ $row->exit_time ? \Carbon\Carbon::parse($row->exit_time)->format('H:i') : '-' }}</td>
+            <td>
+                @php
+                    $minutes = $row->duration_minutes;
+                    $hours = intdiv($minutes, 60);
+                    $mins = $minutes % 60;
+                @endphp
+                <span class="badge {{ $row->status == 'done' ? 'bg-success' : 'bg-secondary' }} badge-duration">
+                    {{ $hours }} jam {{ $mins }} menit
+                </span>
+            </td>
+            <td>
+                <span class="badge {{ $row->status == 'done' ? 'bg-success' : 'bg-info' }}">
+                    {{ $row->status == 'done' ? 'Selesai' : 'Aktif' }}
+                </span>
+            </td>
+            <td>
+                Rp. {{ number_format($row->status == 'done' ? $row->price : 0, 0, ',', '.') }}
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
                 </div>
             </div>
         </div>

@@ -23,19 +23,19 @@
                 <div class="card-body text-center">
                     <h5 class="card-title mb-3">Dashboard Overview <span class="badge bg-success ms-2">Online</span></h5>
                     <div class="row mb-4">
-                        <div class="col-6">
-                            <div class="p-3 bg-light rounded-3">
-                                <p class="fs-1 fw-bold text-primary mb-0">1</p>
-                                <small class="text-muted">Slot Tersedia</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-3 bg-light rounded-3">
-                                <p class="fs-1 fw-bold text-danger mb-0">1</p>
-                                <small class="text-muted">Slot Terisi</small>
-                            </div>
-                        </div>
-                    </div>
+    <div class="col-6">
+        <div class="p-3 bg-light rounded-3">
+            <p class="fs-1 fw-bold text-primary mb-0">{{ $parkingAvailable }}</p>
+            <small class="text-muted">Slot Tersedia</small>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="p-3 bg-light rounded-3">
+            <p class="fs-1 fw-bold text-danger mb-0">{{ $parkingOccupied }}</p>
+            <small class="text-muted">Slot Terisi</small>
+        </div>
+    </div>
+</div>
                     <ul class="list-group list-group-flush text-start">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
     <i class="bi bi-fire me-2 text-danger"></i> Fire Detection
@@ -161,14 +161,14 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card border-0 shadow-sm text-center p-3 h-100">
-                            <div class="card-body">
-                                <i class="fa-solid fa-location-dot text-success mb-2 fs-4"></i>
-                                <h6 class="card-subtitle mb-2 text-muted">Slot Tersedia</h6>
-                                <p class="display-5 fw-bold text-success">1</p>
-                                <small class="text-muted">50% kapasitas kosong</small>
-                            </div>
-                        </div>
+                    <div class="card border-0 shadow-sm text-center p-3 h-100">
+    <div class="card-body">
+        <i class="fa-solid fa-location-dot text-success mb-2 fs-4"></i>
+        <h6 class="card-subtitle mb-2 text-muted">Slot Tersedia</h6>
+        <p class="display-5 fw-bold text-success">{{ $parkingAvailable }}</p>
+        <small class="text-muted">{{ $parkingPercent }}% kapasitas kosong</small>
+    </div>
+</div>
                     </div>
                     <div class="col-md-3">
                     <div class="card border-0 shadow-sm text-center p-3 h-100">
@@ -199,21 +199,22 @@
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <div class=" p-3 h-100">
-                            <h5 class="card-title mb-3">Parking Map</h5>
-                            <div class="parking-map d-flex justify-content-center align-items-center">
-                                <div class="parking-slot-container">
-                                    <span class="parking-label">Parking Area A</span>
-                                    <div class="parking-slot occupied">
-                                        <img src="img/mobil.png" alt="Car" class="car-icon">
-                                    </div>
-                                </div>
-                                <div class="separator"></div>
-                                <div class="parking-slot-container">
-                                    <span class="parking-label">Parking Area B</span>
-                                    <div class="parking-slot available">
-                                    </div>
-                                </div>
-                            </div>
+                        <h5 class="card-title mb-3">Parking Map</h5>
+<div class="parking-map d-flex justify-content-center align-items-center">
+    @foreach(['A', 'B'] as $slot)
+        <div class="parking-slot-container">
+            <span class="parking-label">Parking Area {{ $slot }}</span>
+            <div class="parking-slot {{ $parkingSlotStatus[$slot] }}">
+                @if($parkingSlotStatus[$slot] == 'occupied')
+                    <img src="img/mobil.png" alt="Car" class="car-icon">
+                @endif
+            </div>
+        </div>
+        @if($slot == 'A')
+            <div class="separator"></div>
+        @endif
+    @endforeach
+</div>
                         </div>
                     </div>
                     <div class="col-md-6 mb-4">
@@ -237,6 +238,20 @@
         </li>
         @endif
     @endforeach
+    {{-- Slot Parkir Activity --}}
+    @foreach($recentParkings as $log)
+    @if($log->status == 'done')
+        <li class="mb-2">
+            <span class="text-danger me-2">&bull;</span>
+            {{ \Carbon\Carbon::parse($log->exit_time)->format('H:i') }} - Parking Area {{ $log->slot }} keluar
+        </li>
+    @else
+        <li class="mb-2">
+            <span class="text-success me-2">&bull;</span>
+            {{ \Carbon\Carbon::parse($log->entry_time)->format('H:i') }} - Parking Area {{ $log->slot }} masuk
+        </li>
+    @endif
+@endforeach
 </ul>
             </div>
                     </div>
@@ -250,6 +265,8 @@
 
 @push('scripts')
 <style>
+
+
     .parking-map {
         display: flex;
         align-items: center;
@@ -263,41 +280,50 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin: 0 15px;
+        margin: 0 20px;
+        text-align: center; 
     }
     .parking-label {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         font-weight: bold;
         margin-bottom: 15px;
         color: #333;
+        font-weight: bold;
     }
     .parking-slot {
         width: 120px;
         height: 180px;
-        border-radius: 12px;
+        border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
         color: #333;
         position: relative;
+        margin: 0 auto;
     }
     .parking-slot.occupied {
         background-color: #ffe0e0;
+        background: #ffd6d6;
+        position: relative;
     }
     .parking-slot.available {
         background-color: #e0ffe0;
+        background: #eaffea; 
     }
     .car-icon {
-        width: 90px;
-        height: auto;
+        width: 100px;
+        position: absolute; 
+        left: 10px; 
+        top: 10px;
     }
     .separator {
-        width: 8px;
+        width: 10px;
         height: 180px;
         background-color: #adb5bd;
-        border-radius: 4px;
-        margin: 0 15px;
+        border-radius: 5px;
+        margin: 0 20px;
+        background: #b0b0b0; 
     }
     .dashboard-overview-card {
         margin-top: 20px;
