@@ -8,30 +8,53 @@ use App\Models\Flame;
 
 class FlameController extends Controller
 {
-    public function store(Request $request)
-    {
-        // Mapping nilai ke level dan status
-        $indicator = intval($request->indicator);
+    // FlameController.php
+
+public function store(Request $request)
+{
+    $sensor_id = $request->input('sensor_id');
+    $indicator = $request->input('indicator');
+
+    // Tentukan level & status
+    if ($indicator >= 70) {
+        $level = 'High';
+        $status = 'Danger';
+    } elseif ($indicator >= 50) {
+        $level = 'Medium';
+        $status = 'Warning';
+    } else {
         $level = 'Low';
         $status = 'Safe';
-        if ($indicator >= 70) {
-            $level = 'High';
-            $status = 'Danger';
-        } elseif ($indicator >= 50) {
-            $level = 'Medium';
-            $status = 'Warning';
-        }
-
-        $flame = Flame::create([
-            'sensor_id' => $request->sensor_id ?? 'FS-001',
-            'indicator' => $indicator,
-            'level' => $level,
-            'status' => $status,
-            'last_update' => now(),
-        ]);
-
-        return response()->json(['success' => true, 'data' => $flame]);
     }
+
+    // Ambil status terakhir dari sensor ini
+    $last = Flame::where('sensor_id', $sensor_id)->orderBy('id', 'desc')->first();
+
+    // Jika status sama, JANGAN simpan
+    if ($last && $last->status == $status) {
+        // Tetap balas status terakhir
+        return response()->json([
+            'success' => true,
+            'message' => 'No status change, not saved.',
+            'data' => $last
+        ]);
+    }
+
+    // Jika status berubah, simpan ke database
+    $flame = Flame::create([
+        'sensor_id' => $sensor_id,
+        'indicator' => $indicator,
+        'level' => $level,
+        'status' => $status,
+        'last_update' => now()
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Status changed, saved.',
+        'data' => $flame
+    ]);
+}
 
     public function latest()
     {
