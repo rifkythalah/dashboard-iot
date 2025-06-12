@@ -52,14 +52,23 @@ class ParkingController extends Controller
          } elseif (!$occupied && $active) {
              // Mobil keluar
              $exit = now();
-             $duration = Carbon::parse($active->entry_time)->diffInMinutes($exit);
+             $duration = $active->entry_time->diffInMinutes($exit); // Use entry_time directly as it's a Carbon instance
              $price = intval(floor($duration / 2)) * 5000;
+ 
+             // Log values before update
+             Log::debug("Before Update - Slot: {$slot}, Entry Time (model): {$active->entry_time->toDateTimeString()}, Exit Time: {$exit->toDateTimeString()}, Calculated Duration: {$duration} mins, Price: {$price}");
+
+             // Reload the model to ensure original attributes are used just before update (though not strictly necessary for this update)
+             $active->refresh(); // Re-enable refresh
+             Log::debug("After Refresh - Slot: {$slot}, Entry Time (model): {$active->entry_time->toDateTimeString()}");
+
              $active->update([
+                 'entry_time' => $active->entry_time, // Explicitly retain the original entry time
                  'exit_time' => $exit,
                  'status' => 'done',
                  'price' => $price
              ]);
-             Log::info("Slot {$slot}: Exit recorded. Duration: {$duration} mins, Price: {$price}");
+             Log::info("Slot {$slot}: Exit recorded. Duration: {$duration} mins, Price: {$price}. DB Exit Time: {$active->exit_time->toDateTimeString()}");
          }
      }
 

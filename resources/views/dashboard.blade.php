@@ -38,10 +38,10 @@
     <tbody>
         @foreach($recentParkings as $i => $row)
         <tr>
-            <td>{{ $i+1 }}</td>
+        <td>{{ $i+1 }}</td>
             <td>Parking Area {{ $row->slot }}</td>
-            <td>{{ \Carbon\Carbon::parse($row->entry_time)->format('H:i') }}</td>
-            <td>{{ $row->exit_time ? \Carbon\Carbon::parse($row->exit_time)->format('H:i') : '-' }}</td>
+            <td>{{ $row->entry_time ? $row->entry_time->format('H:i') : '-' }}</td>
+            <td>{{ $row->exit_time ? $row->exit_time->format('H:i') : '-' }}</td>
             <td>
                 @php
                     $minutes = $row->duration_minutes;
@@ -51,7 +51,7 @@
                 <span class="badge {{ $row->status == 'done' ? 'bg-success' : 'bg-secondary' }} badge-duration">
                     {{ $hours }} jam {{ $mins }} menit
                 </span>
-            </td>
+            </td> 
             <td>
                 <span class="badge {{ $row->status == 'done' ? 'bg-success' : 'bg-info' }}">
                     {{ $row->status == 'done' ? 'Selesai' : 'Aktif' }}

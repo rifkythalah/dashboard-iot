@@ -11,11 +11,25 @@ class Parking extends Model
 {
     protected $fillable = ['slot', 'entry_time', 'exit_time', 'status', 'price'];
 
+    // Add casts for datetime fields
+    protected $casts = [
+        'entry_time' => 'datetime',
+        'exit_time' => 'datetime',
+    ];
+
     // Calculate duration in minutes
     public function getDurationMinutesAttribute()
     {
-        $end = $this->exit_time ? Carbon::parse($this->exit_time) : now();
-        return Carbon::parse($this->entry_time)->diffInMinutes($end);
+        // Ensure entry_time is not null before proceeding
+        if (!$this->entry_time) {
+            return 0;
+        }
+
+        // If exit_time is null (meaning parking is still active), use current time for duration calculation
+        // Otherwise, use the stored exit_time
+        $end = $this->exit_time ?? now();
+
+        return $this->entry_time->diffInMinutes($end);
     }
 
     // Calculate price
