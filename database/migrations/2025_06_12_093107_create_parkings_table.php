@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('parkings', function (Blueprint $table) {
             $table->id();
             $table->string('slot'); // 'A' or 'B'
-            $table->timestamp('entry_time');
+            $table->timestamp('entry_time')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('exit_time')->nullable();
             $table->enum('status', ['active', 'done'])->default('active');
             $table->integer('price')->default(0);

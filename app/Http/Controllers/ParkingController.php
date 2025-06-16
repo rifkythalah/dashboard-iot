@@ -19,58 +19,55 @@ class ParkingController extends Controller
          $data = $request->json()->all();
          $slot1 = isset($data['slot1']) ? $data['slot1'] : false;
          $slot2 = isset($data['slot2']) ? $data['slot2'] : false;
-     
+
          Log::info("Parking Data: Slot1=" . ($slot1 ? 'true' : 'false') . ", Slot2=" . ($slot2 ? 'true' : 'false'));
- 
+
          $this->handleSlot('A', $slot1);
          $this->handleSlot('B', $slot2);
-     
+
          return response()->json(['success' => true]);
      }
-     
-     private function handleSlot($slot, $occupied)
-     {
-         Log::info("Handling Slot {$slot}, Occupied: " . ($occupied ? 'true' : 'false'));
- 
-         $active = Parking::where('slot', $slot)->where('status', 'active')->first();
-         
-         if ($active) {
-             Log::info("Slot {$slot}: Active record found. Status: {$active->status}");
-         } else {
-             Log::info("Slot {$slot}: No active record found.");
-         }
- 
-         if ($occupied && !$active) {
-             // Mobil masuk
-             Parking::create([
-                 'slot' => $slot,
-                 'entry_time' => now(),
-                 'status' => 'active',
-                 'price' => 0
-             ]);
-             Log::info("Slot {$slot}: New entry recorded.");
-         } elseif (!$occupied && $active) {
-             // Mobil keluar
-             $exit = now();
-             $duration = $active->entry_time->diffInMinutes($exit); // Use entry_time directly as it's a Carbon instance
-             $price = intval(floor($duration / 2)) * 5000;
- 
-             // Log values before update
-             Log::debug("Before Update - Slot: {$slot}, Entry Time (model): {$active->entry_time->toDateTimeString()}, Exit Time: {$exit->toDateTimeString()}, Calculated Duration: {$duration} mins, Price: {$price}");
 
-             // Reload the model to ensure original attributes are used just before update (though not strictly necessary for this update)
-             $active->refresh(); // Re-enable refresh
-             Log::debug("After Refresh - Slot: {$slot}, Entry Time (model): {$active->entry_time->toDateTimeString()}");
+      private function handleSlot($slot, $occupied)
+    {
+        Log::info("Handling Slot {$slot}, Occupied: " . ($occupied ? 'true' : 'false'));
 
-             $active->update([
-                 'entry_time' => $active->entry_time, // Explicitly retain the original entry time
-                 'exit_time' => $exit,
-                 'status' => 'done',
-                 'price' => $price
-             ]);
-             Log::info("Slot {$slot}: Exit recorded. Duration: {$duration} mins, Price: {$price}. DB Exit Time: {$active->exit_time->toDateTimeString()}");
-         }
-     }
+        $active = Parking::where('slot', $slot)->where('status', 'active')->first();
+
+        if ($active) {
+            Log::info("Slot {$slot}: Active record found. Status: {$active->status}");
+        } else {
+            Log::info("Slot {$slot}: No active record found.");
+        }
+
+        if ($occupied && !$active) {
+            // Mobil masuk
+            Parking::create([
+                'slot' => $slot,
+                'entry_time' => now(),
+                'status' => 'active',
+                'price' => 0
+            ]);
+            Log::info("Slot {$slot}: New entry recorded.");
+        } elseif (!$occupied && $active) {
+            // Mobil keluar
+            $exit = now();
+            $entry = Carbon::parse($active->entry_time);
+            $duration = $entry->diffInMinutes($exit);
+            $price = intval(floor($duration / 2)) * 5000;
+
+            // Log values before update
+            Log::debug("Before Update - Slot: {$slot}, Entry Time: {$entry}, Exit Time: {$exit}, Duration: {$duration}");
+
+            // Update the record with final values
+            $active->update([
+                'exit_time' => $exit,
+                'status' => 'done',
+                'price' => $price
+            ]);
+            Log::info("Slot {$slot}: Exit recorded. Duration: {$duration} mins, Price: {$price}");
+        }
+    }
 
     // For dashboard
     public function dashboard()

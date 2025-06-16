@@ -12,7 +12,7 @@
             Real-time <span class="text-primary"> Parking Monitoring System </span>
             </p>
         </div>
-        
+
          <!-- Parking Monitoring Table -->
         <div class="card mt-4 bg-dark text-white shadow-sm" style="border-radius: 20px;">
             <div class="card-body">
@@ -42,16 +42,23 @@
             <td>Parking Area {{ $row->slot }}</td>
             <td>{{ $row->entry_time ? $row->entry_time->format('H:i') : '-' }}</td>
             <td>{{ $row->exit_time ? $row->exit_time->format('H:i') : '-' }}</td>
-            <td>
+                        <td>
                 @php
-                    $minutes = $row->duration_minutes;
+                    $minutes = 0;
+                    if ($row->status == 'done') {
+                        $entryTime = \Carbon\Carbon::parse($row->entry_time);
+                        $exitTime = \Carbon\Carbon::parse($row->exit_time);
+                        $minutes = $entryTime->diffInMinutes($exitTime);
+                    } else {
+                        $minutes = $row->duration_minutes;
+                    }
                     $hours = intdiv($minutes, 60);
                     $mins = $minutes % 60;
                 @endphp
                 <span class="badge {{ $row->status == 'done' ? 'bg-success' : 'bg-secondary' }} badge-duration">
                     {{ $hours }} jam {{ $mins }} menit
                 </span>
-            </td> 
+            </td>
             <td>
                 <span class="badge {{ $row->status == 'done' ? 'bg-success' : 'bg-info' }}">
                     {{ $row->status == 'done' ? 'Selesai' : 'Aktif' }}
@@ -89,7 +96,7 @@
                         <i class="bi bi-arrow-clockwise"></i> Refresh
                     </button>
                 </div>
-                
+
                 <div class="row">
                     <!-- Status Indicator -->
                     <div class="col-md-4 mb-3 mb-md-0">
@@ -97,7 +104,7 @@
                             <div class="card-body text-center">
                                 <h6 class="mb-3">Current Status</h6>
                                 <div class="status-indicator mb-3">
-    <span class="badge 
+    <span class="badge
         {{ $latestFlame && $latestFlame->status == 'Danger' ? 'bg-danger' : ($latestFlame && $latestFlame->status == 'Warning' ? 'bg-warning' : 'bg-success') }} status-badge">
         {{ $latestFlame ? strtoupper($latestFlame->status) : 'SAFE' }}
     </span>
@@ -142,7 +149,7 @@
     <td>{{ $row->indicator }}</td>
     <td>{{ $row->level }}</td>
     <td>
-        <span class="badge 
+        <span class="badge
             {{ $row->status == 'Safe' ? 'bg-success' : ($row->status == 'Warning' ? 'bg-warning' : 'bg-danger') }}">
             {{ $row->status }}
         </span>

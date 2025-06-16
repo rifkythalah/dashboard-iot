@@ -17,19 +17,18 @@ class Parking extends Model
         'exit_time' => 'datetime',
     ];
 
-    // Calculate duration in minutes
+   // Calculate duration in minutes
     public function getDurationMinutesAttribute()
     {
-        // Ensure entry_time is not null before proceeding
         if (!$this->entry_time) {
             return 0;
         }
 
-        // If exit_time is null (meaning parking is still active), use current time for duration calculation
-        // Otherwise, use the stored exit_time
-        $end = $this->exit_time ?? now();
+        if ($this->status === 'done' && $this->exit_time) {
+            return $this->entry_time->diffInMinutes($this->exit_time);
+        }
 
-        return $this->entry_time->diffInMinutes($end);
+        return $this->entry_time->diffInMinutes(now());
     }
 
     // Calculate price
